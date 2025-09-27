@@ -3,12 +3,14 @@ package server
 import (
 	"fmt"
 	"net"
+	"sync"
+	"time"
 )
 
 type Message struct {
 	from    *Client
 	payload []byte
-	time    string
+	time    time.Time
 }
 
 type Server struct {
@@ -20,7 +22,14 @@ type Server struct {
 	clients map[*Client]bool
 	joinch  chan *Client
 	leaving chan *Client
+
+	msgHist   []*Message
+	histMutex sync.Mutex
 }
+
+const (
+	msgHistSize = 256
+)
 
 func NewServer(listenAddr string) *Server {
 	return &Server{
@@ -30,6 +39,8 @@ func NewServer(listenAddr string) *Server {
 		clients:    make(map[*Client]bool),
 		joinch:     make(chan *Client),
 		leaving:    make(chan *Client),
+
+		msgHist: make([]*Message, 0, msgHistSize),
 	}
 }
 
@@ -38,13 +49,22 @@ func (s *Server) hub() {
 		select {
 		case client := <-s.joinch:
 			s.clients[client] = true
-			fmt.Printf("New client joined: %s (%s)\n", client.username, client.conn.RemoteAddr())
+			fmt.Printf("New client joined: %s (%s)\n", client.username, client.conn.RemoteAddr().String())
+
 		case client := <-s.leaving:
 			fmt.Printf("Client left: %s (%s)\n", client.username, client.conn.RemoteAddr())
 			delete(s.clients, client)
 
 		case msg := <-s.msgch:
-			fmt.Printf("%s | %s\n", msg.time, string(msg.payload))
+			formattedMsg := fmt.Sprintf(
+				"%s | %s: %s\n",
+				msg.time.Format("2006-01-02 15:04:05"),
+				msg.from.username,
+				string(msg.payload),
+			)
+
+			fmt.Print(formattedMsg)
+
 		}
 	}
 }
@@ -58,7 +78,6 @@ func (s *Server) Start() error {
 	s.ln = ln
 
 	go s.hub()
-
 	go s.acceptLoop()
 
 	<-s.quitch
