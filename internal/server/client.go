@@ -61,6 +61,8 @@ Available commands are:
   /%s <username>   - Change your username.
   /%s <message>    - Send a message to everyone in the room.
   (or just type a message to send it)
+  /%s 			   - Show a list of last messages sent (chat log)
+  /%s 			   - Shows a help message (this message)
 ---------------------------------
 `
 	formattedText := fmt.Sprintf(
@@ -68,6 +70,8 @@ Available commands are:
 		c.username,
 		command.CmdNick,
 		command.CmdSend,
+		command.CmdView,
+		command.CmdHelp,
 	)
 
 	c.msg(formattedText)
