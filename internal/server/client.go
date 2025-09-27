@@ -27,6 +27,8 @@ func (c *Client) readLoop() {
 		c.conn.Close()
 	}()
 
+	c.sendWelcomeMessage()
+
 	sc := bufio.NewScanner(c.conn)
 
 	for sc.Scan() {
@@ -35,12 +37,38 @@ func (c *Client) readLoop() {
 
 		if err != nil {
 			errorMsg := fmt.Sprintf("Error: %s\n", err.Error())
-			c.conn.Write([]byte(errorMsg))
+			c.msg(errorMsg)
 			continue
 		}
 
 		if cmd != nil {
+			c.server.handleCommand(c, cmd)
 		}
 
 	}
+}
+
+func (c *Client) msg(txt string) {
+	c.conn.Write([]byte(txt + "\n"))
+}
+
+func (c *Client) sendWelcomeMessage() {
+	welcomeText := `
+Welcome to the Go Chat Server!
+---------------------------------
+You are connected as: %s
+Available commands are:
+  /%s <username>   - Change your username.
+  /%s <message>    - Send a message to everyone in the room.
+  (or just type a message to send it)
+---------------------------------
+`
+	formattedText := fmt.Sprintf(
+		welcomeText,
+		c.username,
+		command.CmdNick,
+		command.CmdSend,
+	)
+
+	c.msg(formattedText)
 }
