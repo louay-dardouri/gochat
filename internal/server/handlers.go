@@ -42,6 +42,7 @@ func (s *Server) handleNickCommand(c *Client, cmd *command.Command) {
 	for cl := range s.clients {
 		if cl.username == newUsername {
 			c.msg(fmt.Sprintf("Username \"%s\" is already taken. Please choose another", newUsername))
+			return
 		}
 	}
 	c.username = newUsername
