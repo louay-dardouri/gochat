@@ -1,18 +1,9 @@
-package main
+package server
 
 import (
-	"bufio"
 	"fmt"
-	"log"
 	"net"
-	"time"
 )
-
-type Client struct {
-	username string
-	conn     net.Conn
-	server   *Server
-}
 
 type Message struct {
 	from    *Client
@@ -39,14 +30,6 @@ func NewServer(listenAddr string) *Server {
 		clients:    make(map[*Client]bool),
 		joinch:     make(chan *Client),
 		leaving:    make(chan *Client),
-	}
-}
-
-func NewClient(conn net.Conn, s *Server) *Client {
-	return &Client{
-		username: "anon",
-		conn:     conn,
-		server:   s,
 	}
 }
 
@@ -96,29 +79,4 @@ func (s *Server) acceptLoop() {
 
 		go client.readLoop()
 	}
-}
-
-func (c *Client) readLoop() {
-	defer func() {
-		c.server.leaving <- c
-		c.conn.Close()
-	}()
-
-	sc := bufio.NewScanner(c.conn)
-
-	for sc.Scan() {
-		msg := sc.Text()
-		formattedMsg := fmt.Sprintf("%s: %s", c.username, msg)
-
-		c.server.msgch <- &Message{
-			from:    c,
-			payload: []byte(formattedMsg),
-			time:    time.Now().Format("2006-01-02 15:04:05"),
-		}
-	}
-}
-
-func main() {
-	server := NewServer(":8080")
-	log.Fatal(server.Start())
 }
