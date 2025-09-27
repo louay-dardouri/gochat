@@ -24,7 +24,10 @@ func Parse(msg string) (*Command, error) {
 	}
 
 	if !strings.HasPrefix(msg, Prefix) {
-		return nil, fmt.Errorf("Prefix missing or unknown")
+		return &Command{
+			Name: CmdSend,
+			Args: strings.Fields(msg),
+		}, nil
 	}
 
 	msg = msg[1:]
