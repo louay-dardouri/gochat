@@ -62,6 +62,7 @@ Available commands are:
   /%s <message>    - Send a message to everyone in the room.
   (or just type a message to send it)
   /%s 			   - Show a list of last messages sent (chat log)
+  /%s 			   - Prints current username
   /%s 			   - Shows a help message (this message)
 ---------------------------------
 `
@@ -71,6 +72,7 @@ Available commands are:
 		command.CmdNick,
 		command.CmdSend,
 		command.CmdView,
+		command.CmdWho,
 		command.CmdHelp,
 	)
 

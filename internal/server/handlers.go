@@ -17,7 +17,14 @@ func (s *Server) handleCommand(c *Client, cmd *command.Command) {
 		s.handleViewCommand(c)
 	case command.CmdHelp:
 		s.handleHelpCommand(c)
+	case command.CmdWho:
+		s.handleWhoCommand(c)
 	}
+}
+
+func (s *Server) handleWhoCommand(c *Client) {
+	msg := fmt.Sprintf("Your username is: %s", c.username)
+	c.msg(msg)
 }
 
 func (s *Server) handleHelpCommand(c *Client) {
@@ -32,6 +39,11 @@ func (s *Server) handleNickCommand(c *Client, cmd *command.Command) {
 	}
 	oldUsername := c.username
 	newUsername := cmd.Args[0]
+	for cl := range s.clients {
+		if cl.username == newUsername {
+			c.msg(fmt.Sprintf("Username \"%s\" is already taken. Please choose another", newUsername))
+		}
+	}
 	c.username = newUsername
 	feedback := fmt.Sprintf("Your username is now %s", newUsername)
 	c.msg(feedback)

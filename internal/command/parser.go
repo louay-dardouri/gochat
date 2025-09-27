@@ -16,6 +16,7 @@ const (
 	CmdSend = "send"
 	CmdView = "view"
 	CmdHelp = "help"
+	CmdWho  = "whoami"
 )
 
 func Parse(msg string) (*Command, error) {
@@ -37,7 +38,7 @@ func Parse(msg string) (*Command, error) {
 	args := parts[1:]
 
 	switch commandName {
-	case CmdNick, CmdSend, CmdView, CmdHelp:
+	case CmdNick, CmdSend, CmdView, CmdHelp, CmdWho:
 		return &Command{
 			Name: commandName,
 			Args: args,
