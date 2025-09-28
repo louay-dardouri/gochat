@@ -1,0 +1,23 @@
+services:
+    server:
+        container_name: server
+        hostname: server
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        networks:
+            - chatnet
+    wetty:
+        image: wettyoss/wetty
+        container_name: wetty
+        depends_on:
+            - server
+        ports:
+            - "3000:3000"
+        restart: unless-stopped
+        command: --base-path "" --ssh-host=server --ssh-port=22
+        networks:
+            - chatnet
+networks:
+    chatnet:
+        driver: bridge
