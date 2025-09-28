@@ -19,6 +19,8 @@ func (s *Server) handleCommand(c *Client, cmd *command.Command) {
 		s.handleHelpCommand(c)
 	case command.CmdWho:
 		s.handleWhoCommand(c)
+	case command.CmdUsrs:
+		s.handleUsersCommand(c)
 	}
 }
 
@@ -102,4 +104,19 @@ func (s *Server) handleViewCommand(c *Client) {
 	}
 
 	c.msg("--- End of history ---")
+}
+
+func (s *Server) handleUsersCommand(c *Client) {
+	c.msg(fmt.Sprintf("--- Displaying %d users ---", len(c.server.clients)))
+
+	for cl := range c.server.clients {
+		formattedMsg := fmt.Sprintf(
+			"%s | %s",
+			cl.conn.RemoteAddr().String(),
+			cl.username,
+		)
+		c.msg(formattedMsg)
+	}
+
+	c.msg("--- End of users ---")
 }

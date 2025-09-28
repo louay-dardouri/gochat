@@ -63,6 +63,7 @@ Available commands are:
   (or just type a message to send it)
   /%s 			   - Show a list of last messages sent (chat log)
   /%s 			   - Prints current username
+  /%s 			   - Prints list of users
   /%s 			   - Shows a help message (this message)
 ---------------------------------
 `
@@ -73,6 +74,7 @@ Available commands are:
 		command.CmdSend,
 		command.CmdView,
 		command.CmdWho,
+		command.CmdUsrs,
 		command.CmdHelp,
 	)
 
