@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"sync"
 	"time"
@@ -76,6 +77,8 @@ func (s *Server) Start() error {
 	}
 	defer ln.Close()
 	s.ln = ln
+
+	log.Printf("TCP Chat Server started, listening on %s", s.listenAddr)
 
 	go s.hub()
 	go s.acceptLoop()
