@@ -41,12 +41,16 @@ func (s *Server) handleNickCommand(c *Client, cmd *command.Command) {
 	}
 	oldUsername := c.username
 	newUsername := cmd.Args[0]
+
+	s.clientsMutex.RLock()
 	for cl := range s.clients {
 		if cl.username == newUsername {
 			c.msg(fmt.Sprintf("Username \"%s\" is already taken. Please choose another", newUsername))
 			return
 		}
 	}
+	s.clientsMutex.RUnlock()
+
 	c.username = newUsername
 	feedback := fmt.Sprintf("Your username is now %s", newUsername)
 	c.msg(feedback)
@@ -107,8 +111,11 @@ func (s *Server) handleViewCommand(c *Client) {
 }
 
 func (s *Server) handleUsersCommand(c *Client) {
+	s.clientsMutex.RLock()
 	c.msg(fmt.Sprintf("--- Displaying %d users ---", len(c.server.clients)))
+	s.clientsMutex.RUnlock()
 
+	s.clientsMutex.RLock()
 	for cl := range c.server.clients {
 		formattedMsg := fmt.Sprintf(
 			"%s | %s",
@@ -117,6 +124,7 @@ func (s *Server) handleUsersCommand(c *Client) {
 		)
 		c.msg(formattedMsg)
 	}
+	s.clientsMutex.RUnlock()
 
 	c.msg("--- End of users ---")
 }

@@ -20,9 +20,10 @@ type Server struct {
 	quitch     chan struct{}
 	msgch      chan *Message
 
-	clients map[*Client]bool
-	joinch  chan *Client
-	leaving chan *Client
+	clients      map[*Client]bool
+	clientsMutex sync.RWMutex
+	joinch       chan *Client
+	leaving      chan *Client
 
 	msgHist   []*Message
 	histMutex sync.Mutex
@@ -49,12 +50,16 @@ func (s *Server) hub() {
 	for {
 		select {
 		case client := <-s.joinch:
+			s.clientsMutex.Lock()
 			s.clients[client] = true
+			s.clientsMutex.Unlock()
 			fmt.Printf("New client joined: %s (%s)\n", client.username, client.conn.RemoteAddr().String())
 
 		case client := <-s.leaving:
 			fmt.Printf("Client left: %s (%s)\n", client.username, client.conn.RemoteAddr())
+			s.clientsMutex.Lock()
 			delete(s.clients, client)
+			s.clientsMutex.Unlock()
 
 		case msg := <-s.msgch:
 			formattedMsg := fmt.Sprintf(
